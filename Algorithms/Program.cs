@@ -28,6 +28,7 @@ namespace Algorithms
             string s = "";
             resizingArrayStack.Foreach((i) => { s += i.IntValue; });
             Console.WriteLine(s);
+            Console.ReadKey();
         }
     }
 }
