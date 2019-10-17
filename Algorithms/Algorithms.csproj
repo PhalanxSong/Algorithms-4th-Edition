@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -54,6 +53,8 @@
     <Compile Include="Chapter.1.Collection\StackAndQueue\StackByResizingArray.cs" />
     <Compile Include="Chapter.2.Sort\QuickSort.cs" />
     <Compile Include="Chapter.2.Sort\MaxPQ.cs" />
+    <Compile Include="Chapter.2.Sort\IndexMaxPQ.cs" />
+    <Compile Include="Chapter.2.Sort\HeapSort.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

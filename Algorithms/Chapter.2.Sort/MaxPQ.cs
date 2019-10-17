@@ -3,6 +3,7 @@ using Algorithms.Collection;
 
 namespace Algorithms.Sort
 {
+    /// <summary> 优先队列 </summary>
     public class MaxPQ<Item> : IterableCollectionBase<Item> where Item : class, IComparable
     {
         private Item[] _HeapArr;

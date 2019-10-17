@@ -3,29 +3,41 @@ using Algorithms.Collection;
 
 namespace Algorithms.Sort
 {
+    // example
+    //               0  1  2  3  4  5  6  7  8  9 10
+    // pq            /  3 10  6  1  4  8
+    // inversed_qp   /  4     1  5     3     6     2
+    // item          /  k     a  n     c     h     b
+    //              a
+    //            b   c
+    //           k n h  
+
+    /// <summary> 
+    /// 索引优先队列 https://www.cnblogs.com/nullzx/p/6624731.html
+    /// </summary>
     public class IndexMaxPQ<Item> : Iterable<int> where Item : class, IComparable
     {
         // number of elements on PQ
         public int Count { get; protected set; }
 
+        // _Items[i] = priority of i
+        private Item[] _Items;
         // binary heap using 1-based indexing
         private int[] _Pq;
-        // inverse of pq - qp[pq[i]] = pq[qp[i]] = i
-        private int[] _Qp;
-        // keys[i] = priority of i
-        private Item[] _Items;
+        // inverse of _PQ - _QP[_PQ[i]] = _PQ[_QP[i]] = i
+        private int[] _InversedPq;
 
-        public IndexMaxPQ(int maxN)
+        public IndexMaxPQ(int capacity)
         {
-            if (maxN < 0)
+            if (capacity <= 0)
                 throw new Exception();
 
             Count = 0;
-            _Items = new Item[maxN + 1];
-            _Pq = new int[maxN + 1];
-            _Qp = new int[maxN + 1];
-            for (int i = 0; i <= maxN; i++)
-                _Qp[i] = -1;
+            _Items = new Item[capacity + 1];
+            _Pq = new int[capacity + 1];
+            _InversedPq = new int[capacity + 1];
+            for (int i = 0; i <= capacity; i++)
+                _InversedPq[i] = -1;
         }
 
         public bool IsEmpty()
@@ -33,20 +45,23 @@ namespace Algorithms.Sort
             return Count == 0;
         }
 
-        public bool Contains(int i)
+        public bool Contains(int index)
         {
-            return _Qp[i] != -1;
+            return _InversedPq[index] != -1;
         }
 
-        public void Insert(int i, Item key)
+        public void Insert(int itemIndex, Item item)
         {
-            if (Contains(i))
+            if (itemIndex <= 0)
+                throw new Exception("index unvalid");
+
+            if (Contains(itemIndex))
                 throw new Exception("index is already in the priority queue");
 
             Count++;
-            _Qp[i] = Count;
-            _Pq[Count] = i;
-            _Items[i] = key;
+            _InversedPq[itemIndex] = Count;
+            _Pq[Count] = itemIndex;
+            _Items[itemIndex] = item;
             Swim(Count);
         }
 
@@ -71,14 +86,18 @@ namespace Algorithms.Sort
             if (Count == 0)
                 throw new Exception("Priority queue underflow");
 
-            int max = _Pq[1];
+            int maxItemIndex = _Pq[1];
             Exchange(1, Count--);
             Sink(1);
 
-            _Qp[max] = -1;        // delete
-            _Items[max] = null;    // to help with garbage collection
-            _Pq[Count + 1] = -1;        // not needed
-            return max;
+            // delete
+            _InversedPq[maxItemIndex] = -1;
+            // to help with garbage collection
+            _Items[maxItemIndex] = null;
+            // not needed
+            _Pq[Count + 1] = -1;
+
+            return maxItemIndex;
         }
 
         public Item ItemOf(int i)
@@ -95,39 +114,41 @@ namespace Algorithms.Sort
                 throw new Exception("index is not in the priority queue");
 
             _Items[i] = key;
-            Swim(_Qp[i]);
-            Sink(_Qp[i]);
+            Swim(_InversedPq[i]);
+            Sink(_InversedPq[i]);
         }
 
-        public void IncreaseKey(int i, Item key)
+        public void IncreaseItem(int i, Item key)
         {
-            if (!Contains(i)) throw new Exception("index is not in the priority queue");
+            if (!Contains(i))
+                throw new Exception("index is not in the priority queue");
             if (_Items[i].CompareTo(key) >= 0)
                 throw new Exception("Calling increaseKey() with given argument would not strictly increase the key");
 
             _Items[i] = key;
-            Swim(_Qp[i]);
+            Swim(_InversedPq[i]);
         }
 
-        public void DecreaseKey(int i, Item key)
+        public void DecreaseItem(int i, Item key)
         {
-            if (!Contains(i)) throw new Exception("index is not in the priority queue");
+            if (!Contains(i))
+                throw new Exception("index is not in the priority queue");
             if (_Items[i].CompareTo(key) <= 0)
                 throw new Exception("Calling decreaseKey() with given argument would not strictly decrease the key");
 
             _Items[i] = key;
-            Sink(_Qp[i]);
+            Sink(_InversedPq[i]);
         }
 
-        public void Delete(int i)
+        public void DeleteItem(int i)
         {
             if (!Contains(i)) throw new Exception("index is not in the priority queue");
-            int index = _Qp[i];
+            int index = _InversedPq[i];
             Exchange(index, Count--);
             Swim(index);
             Sink(index);
             _Items[i] = null;
-            _Qp[i] = -1;
+            _InversedPq[i] = -1;
         }
 
         private bool Less(int i, int j)
@@ -140,8 +161,8 @@ namespace Algorithms.Sort
             int swap = _Pq[i];
             _Pq[i] = _Pq[j];
             _Pq[j] = swap;
-            _Qp[_Pq[i]] = i;
-            _Qp[_Pq[j]] = j;
+            _InversedPq[_Pq[i]] = i;
+            _InversedPq[_Pq[j]] = j;
         }
 
         private void Swim(int k)
